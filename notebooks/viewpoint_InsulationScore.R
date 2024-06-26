@@ -9,27 +9,27 @@ library(GenomicRanges)
 
 # Insulation score of a viewpoint
 
-#viewpoint in bp; window: default value <- 256e3: can be modified; bin.width (<-resolution): default value <- 64e3: can be modified
+# viewpoint in bp; window: default value <- 256e3: can be modified; bin.width (<-resolution): default value <- 64e3: can be modified
 VPinsScore <- function(matrix, view.point, window = 256e3, bin.width = 64e3) {
   
-  #conversion of the viewpoint from bp to bin
+  # conversion of the viewpoint from bp to bin
   vpBin <- view.point / bin.width
-  #position of the beginning of the viewpoint (in bin)
+  # position of the beginning of the viewpoint (in bin)
   start <- vpBin - (window / bin.width) + 1
-  #position of the end of the viewpoint (in bin)
+  # position of the end of the viewpoint (in bin)
   stop <- vpBin + (window / bin.width)
 
-  #viewpoint converted as a "sub"-matrix
+  # viewpoint converted as a "sub"-matrix
   subMat <- matrix[start:stop, start:stop]
 
-  #make the matrix symmetrical
+  # make the matrix symmetrical
   subMatSym <- as.matrix(subMat)
   subMatSym[lower.tri(subMatSym)] <- t(subMatSym)[lower.tri(subMatSym)]
 
-  #definition of the position of A, B & C with (4 zones in the "sub"-matrix):
-  #   A   C
-  #   C   B
-  #then calculate the mean number of interactions within each zone
+  # definition of the position of A, B & C with (4 zones in the "sub"-matrix):
+  #    A   C
+  #    C   B
+  # then calculate the mean number of interactions within each zone
 
   subStart <- 1
   subStop <- nrow(subMatSym)
@@ -42,7 +42,7 @@ VPinsScore <- function(matrix, view.point, window = 256e3, bin.width = 64e3) {
 
   C <- subMatSym[subStart:mid1, mid2:subStop] %>% mean(.)
 
-  IS <- (A + B) / 2 - C #Insulation Score
+  IS <- (A + B) / 2 - C # Insulation Score
 
   return(IS)
 }
