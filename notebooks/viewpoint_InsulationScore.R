@@ -9,38 +9,42 @@ library(GenomicRanges)
 
 # Insulation score of a viewpoint
 
-insScore <- function(matrix, view.point, window = 256e3, bin.width = 64e3) {
 #viewpoint in bp; window: default value = 256e3: can be modified; bin.width (=resolution): default value = 64e3: can be modified
+VPinsScore <- function(matrix, view.point, window = 256e3, bin.width = 64e3) {
   
-  vp_bin = view.point/bin.width #conversion of the viewpoint from bp to bin
-  start = vp_bin-(window/bin.width)+1 #position of the beginning of the viewpoint (in bin)
-  stop = vp_bin+(window/bin.width) #position of the end of the viewpoint (in bin)
+  #conversion of the viewpoint from bp to bin
+  vpBin <- view.point / bin.width
+  #position of the beginning of the viewpoint (in bin)
+  start <- vpBin - (window / bin.width) + 1
+  #position of the end of the viewpoint (in bin)
+  stop <- vpBin + (window / bin.width)
 
-  sub_mat = matrix[start:stop, start:stop] #viewpoint converted as a "sub"-matrix
+  #viewpoint converted as a "sub"-matrix
+  subMat = matrix[start:stop, start:stop]
 
-  sub_mat_sym = as.matrix(sub_mat)
-  sub_mat_sym[lower.tri(sub_mat_sym)] <- t(sub_mat_sym)[lower.tri(sub_mat_sym)] #make the matrix symmetrical
+  #make the matrix symmetrical
+  subMatSym = as.matrix(subMat)
+  subMatSym[lower.tri(subMatSym)] <- t(subMatSym)[lower.tri(subMatSym)]
 
   #definition of the position of A, B & C with (4 zones in the "sub"-matrix):
   #   A   C
   #   C   B
   #then calculate the mean number of interactions within each zone
 
-  sub_start = 1
-  sub_stop = nrow(sub_mat_sym)
-  mid1 = nrow(sub_mat_sym)/2
+  subStart = 1
+  subStop = nrow(subMatSym)
+  mid1 = nrow(subMatSym) / 2
   mid2 = mid1 + 1
 
-  A = sub_mat_sym[sub_start:mid1, sub_start:mid1] %>% mean(.)
+  A = subMatSym[subStart:mid1, subStart:mid1] %>% mean(.)
 
-  B = sub_mat_sym[mid2:sub_stop, mid2:sub_stop] %>% mean(.)
+  B = subMatSym[mid2:subStop, mid2:subStop] %>% mean(.)
 
-  C = sub_mat_sym[sub_start:mid1, mid2:sub_stop] %>% mean(.)
+  C = subMatSym[subStart:mid1, mid2:subStop] %>% mean(.)
 
-  IS = (A+B)/2 - C #Insulation Score
+  IS = (A + B) / 2 - C #Insulation Score
 
   return(IS)
 }
 
 
-# 
